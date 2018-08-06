@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width,height=device-height,user-scalable=no,initial-scale=1,maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta charset="UTF-8">
+</head>
+
+<body>
+  <script src="https://rawgit.com/phinajs/phina.js/develop/build/phina.js"></script>
+  <script src="https://rawgit.com/mrdoob/three.js/r95/build/three.js"></script>
+  <script>
+  phina.globalize();
+
+  phina.main(function() {
+    var app = GameApp({
+      backgroundColor: "black",
+      startLabel: "main",
+    });
+
+    app.enableStats();
+    app.run();
+  });
+
+  phina.define("MainScene", {
+    superClass: "DisplayScene",
+    init: function() {
+      this.superInit();
+    },
+  });
+  </script>
+</body>
+
+</html>
