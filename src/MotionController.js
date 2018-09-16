@@ -19,10 +19,10 @@ phina.namespace(function() {
         this.target._transitionWeightBefore = 0;
         this.target._transitionWeightCurrent = 0;
 
-        this.target.$t.mixer.addEventListener("finished", (e) => {
+        this.target.animationMixer.addEventListener("finished", (e) => {
           if (this._currentMotion) this._currentMotion.flare("finished");
         });
-        this.target.$t.mixer.addEventListener("loop", (e) => {
+        this.target.animationMixer.addEventListener("loop", (e) => {
           if (this._currentMotion) this._currentMotion.flare("entered");
         });
       });
@@ -40,17 +40,17 @@ phina.namespace(function() {
 
       this._currentMotion = newMotion;
 
-      if (newMotion._action == null) {
-        newMotion._action = this.target.$t.mixer.clipAction(newMotion._clip);
+      if (newMotion._animationAction == null) {
+        newMotion._animationAction = this.target.animationMixer.clipAction(newMotion._animationClip);
         if (newMotion.loop) {
-          newMotion._action.setLoop(THREE.LoopRepeat);
+          newMotion._animationAction.setLoop(THREE.LoopRepeat);
         } else {
-          newMotion._action.setLoop(THREE.LoopOnce);
-          newMotion._action.clampWhenFinished = true;
+          newMotion._animationAction.setLoop(THREE.LoopOnce);
+          newMotion._animationAction.clampWhenFinished = true;
         }
       }
 
-      this._currentAction = newMotion._action;
+      this._currentAction = newMotion._animationAction;
       this._currentAction.stop();
       this._currentAction.play();
       this._currentAction.setEffectiveWeight(0);
@@ -86,8 +86,8 @@ phina.namespace(function() {
     },
 
     setTime: function(time) {
-      this.target.$t.mixer.time = 0;
-      this.target.$t.mixer.update(time);
+      this.target.animationMixer.time = 0;
+      this.target.animationMixer.update(time);
       return this;
     },
 
@@ -99,7 +99,7 @@ phina.namespace(function() {
 
       if (this._currentMotion) this._currentMotion.update(this);
 
-      target.$t.mixer.update(app.deltaTime / 1000);
+      target.animationMixer.update(app.deltaTime / 1000);
     },
 
   });
@@ -110,15 +110,18 @@ phina.namespace(function() {
     _transitions: null,
     loop: false,
 
-    _clip: null,
-    _action: null,
+    /** @type {THREE.AnimationClip} */
+    _animationClip: null,
+
+    /** @type {THREE.AnimationAction} */
+    _animationAction: null,
 
     _timeEventListeners: null,
 
-    init: function(clip) {
+    init: function(animationClip) {
       this.superInit();
 
-      this._clip = clip
+      this._animationClip = animationClip
       this._transitions = [];
 
       this._timeEventListeners = [];
@@ -188,9 +191,9 @@ phina.namespace(function() {
     },
 
     update: function(controller) {
-      if (this._action) {
+      if (this._animationAction) {
         this._timeEventListeners.forEach(t => {
-          if (!t.fired && t.time <= this._action.time * 1000) {
+          if (!t.fired && t.time <= this._animationAction.time * 1000) {
             t.listener.apply(this);
             t.fired = true;
           }

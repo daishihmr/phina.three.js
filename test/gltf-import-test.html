@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width,height=device-height,user-scalable=no,initial-scale=1,maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta charset="UTF-8">
+</head>
+
+<body>
+  <script src="https://rawgit.com/mrdoob/three.js/r95/build/three.js"></script>
+  <script src="https://rawgit.com/mrdoob/three.js/r95/examples/js/loaders/GLTFLoader.js"></script>
+  <script>
+  const loadMesh = () => new Promise(resolve => {
+    const loader = new THREE.GLTFLoader();
+    loader.load("./cureecho.gltf", (data) => {
+      console.log(data);
+      resolve(data.scene);
+    });
+  });
+
+  const loadAnimations = () => new Promise(resolve => {
+    const loader = new THREE.GLTFLoader();
+    loader.load("./armature.gltf", (data) => {
+      console.log(data);
+      const animations = data.animations.reduce((b, c) => {
+        b[c.name] = c;
+        return b;
+      }, {});
+      resolve(animations);
+    });
+  });
+
+  const main = async() => {
+    const skinnedMesh = await loadMesh();
+    const animations = await loadAnimations();
+    console.log(skinnedMesh, animations);
+
+    const scene = new THREE.Scene();
+    const dlight = new THREE.DirectionalLight(0xffffff, 1);
+    dlight.position.set(1, 1, 1).normalize();
+    const alight = new THREE.AmbientLight(0x444444);
+
+    const camera = new THREE.PerspectiveCamera(45, 1 / 1, 0.01, 10000);
+
+    scene.add(dlight);
+    scene.add(alight);
+    scene.add(skinnedMesh);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(500, 500);
+    renderer.gammaOutput = true;
+    document.body.appendChild(renderer.domElement);
+
+    const mixer = new THREE.AnimationMixer(skinnedMesh);
+    const action = mixer.clipAction(animations.walk);
+    action.play();
+
+    let angle = 0;
+    let target = new THREE.Vector3(0, 5, 0);
+    let distance = 30;
+
+    const render = () => {
+      mixer.update(1 / 60);
+
+      camera.position.set(Math.cos(angle) * distance, 10, Math.sin(angle) * distance);
+      camera.lookAt(target);
+
+      renderer.render(scene, camera);
+
+      angle += 0.01;
+      setTimeout(render, 1000 / 60);
+    };
+
+    render();
+  };
+
+  main();
+  </script>
+</body>
+
+</html>

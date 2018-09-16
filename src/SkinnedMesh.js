@@ -4,6 +4,7 @@ phina.namespace(function() {
   phina.define("phina.three.SkinnedMesh", {
     superClass: "phina.three.Mesh",
 
+    /** @type {Object.<int|String, phina.three.Motion>} */
     _motionCache: null,
     centerPosition: null,
 
@@ -15,19 +16,19 @@ phina.namespace(function() {
 
       this.superInit(options);
 
-      this.$t.mixer = new THREE.AnimationMixer(this.$t);
+      this.animationMixer = new THREE.AnimationMixer(this.$t);
       this._motionCache = {};
     },
 
     createMotion: function(indexOrName) {
-      let clip = typeof(indexOrName) == "number" ? this.$t.geometry.animations[indexOrName] : THREE.AnimationClip.findByName(this.$t, indexOrName);
-      return Motion(clip);
+      const animationClip = typeof(indexOrName) == "number" ? this.$t.geometry.animations[indexOrName] : THREE.AnimationClip.findByName(this.$t, indexOrName);
+      return phina.three.Motion(animationClip);
     },
 
     getMotion: function(indexOrName) {
       if (this._motionCache[indexOrName] == null) {
-        let clip = typeof(indexOrName) == "number" ? this.$t.geometry.animations[indexOrName] : THREE.AnimationClip.findByName(this.$t, indexOrName);
-        this._motionCache[indexOrName] = Motion(clip);
+        const animationClip = typeof(indexOrName) == "number" ? this.$t.geometry.animations[indexOrName] : THREE.AnimationClip.findByName(this.$t, indexOrName);
+        this._motionCache[indexOrName] = phina.three.Motion(animationClip);
       }
       return this._motionCache[indexOrName];
     },
